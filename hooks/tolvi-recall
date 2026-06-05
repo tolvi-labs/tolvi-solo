@@ -3,7 +3,6 @@
 # Uses `tolvi recall` if the CLI is available; falls back to a direct vault read.
 set -euo pipefail
 
-# Find vault by walking up from cwd
 find_vault() {
   local dir="${1:-$PWD}"
   while [[ "$dir" != "/" ]]; do
@@ -15,7 +14,6 @@ find_vault() {
 
 VAULT="$(find_vault "$PWD" 2>/dev/null)" || exit 0
 
-# Use tolvi CLI if available
 if command -v tolvi &>/dev/null; then
   exec tolvi recall --format hook-json --vault "$VAULT"
 fi
@@ -33,7 +31,7 @@ fi
 
 active_decisions=""
 if [[ -d "$DECISIONS_DIR" ]]; then
-  active_decisions="$(ls -1 "$DECISIONS_DIR"/*.md 2>/dev/null | sort -r | head -10 | while read -r f; do
+  active_decisions="$(ls -1 "$DECISIONS_DIR"/*.md 2>/dev/null | grep -v '.gitkeep' | sort -r | head -10 | while read -r f; do
     title="$(grep -m1 '^# ' "$f" 2>/dev/null | sed 's/^# //' || basename "$f" .md)"
     echo "- $title"
   done)"

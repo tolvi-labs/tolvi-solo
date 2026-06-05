@@ -1,12 +1,12 @@
 # tolvi-solo
 
-A vault for solo builders. Capture decisions, patterns, and session notes as plain Markdown — searchable, committable, and readable by AI agents without any server setup.
+A vault for solo builders. Capture decisions, patterns, and session notes as plain Markdown - searchable, committable, and readable by AI agents without any server setup.
 
 > **Status:** Early. Engineer pack is the first vertical. Writer, CPA, and Entrepreneur packs are planned.
 
 ## What it is
 
-tolvi-solo provisions a `vault/` directory in any repo (or standalone folder) and populates it with role-specific templates. The vault is plain Markdown with YAML frontmatter — no database, no cloud, no dependencies.
+tolvi-solo provisions a `vault/` directory in any repo (or standalone folder) and populates it with role-specific templates. The vault is plain Markdown with YAML frontmatter - no database, no cloud, no dependencies.
 
 Three doc types:
 
@@ -34,8 +34,8 @@ Run from inside the repo you want to vault. Creates `vault/` at the git root wit
 
 Wires two Claude Code session hooks:
 
-- **SessionStart** — surfaces recent sessions and active decisions before your first message
-- **PostToolUse(git commit)** — nudges you to log the session after a commit
+- **`tolvi-recall` (SessionStart)** - surfaces recent sessions and active decisions before your first message
+- **`tolvi-sync` (PreToolUse, git commit)** - fires before every commit; auto-stages vault changes and blocks the commit if no session note exists for today, so the vault is always committed alongside the code
 
 ### Options
 
@@ -60,7 +60,7 @@ export ANTHROPIC_API_KEY=sk-ant-...
 tolvi ask "why did we choose postgres?"
 ```
 
-The CLI uses Context-Augmented Generation — whole vault into Anthropic context, streamed answer with citations.
+The CLI uses Context-Augmented Generation - whole vault into Anthropic context, streamed answer with citations.
 
 ### Without the CLI
 
