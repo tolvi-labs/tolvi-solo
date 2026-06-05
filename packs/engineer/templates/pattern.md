@@ -1,5 +1,5 @@
 ---
-tags: [pattern]
+tags: [pattern, <language-or-framework>]
 status: active
 ---
 

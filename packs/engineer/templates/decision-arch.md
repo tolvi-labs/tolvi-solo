@@ -1,7 +1,11 @@
 ---
-tags: [decision, architecture]
+tags: [decision, architecture, <repo-slug>]
 date: YYYY-MM-DD
+repo: <repo-slug>
 status: active
+ticket: none
+user_impact: none
+product_area: none
 ---
 
 # [Architectural decision title]
