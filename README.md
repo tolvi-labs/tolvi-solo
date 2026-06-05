@@ -1,1 +1,90 @@
 # tolvi-solo
+
+A vault for solo builders. Capture decisions, patterns, and session notes as plain Markdown — searchable, committable, and readable by AI agents without any server setup.
+
+> **Status:** Early. Engineer pack is the first vertical. Writer, CPA, and Entrepreneur packs are planned.
+
+## What it is
+
+tolvi-solo provisions a `vault/` directory in any repo (or standalone folder) and populates it with role-specific templates. The vault is plain Markdown with YAML frontmatter — no database, no cloud, no dependencies.
+
+Three doc types:
+
+| Type | Where | Purpose |
+|---|---|---|
+| **Decisions** | `vault/decisions/` | Why you chose something over the alternatives |
+| **Patterns** | `vault/patterns/` | Reusable approaches worth naming |
+| **Sessions** | `vault/sessions/` | What happened, what's left open |
+
+## Quickstart
+
+```bash
+git clone https://github.com/tolvi-labs/tolvi-solo
+cd tolvi-solo
+./install.sh
+```
+
+Run from inside the repo you want to vault. Creates `vault/` at the git root with the Engineer pack templates.
+
+### With Claude Code hooks (recommended)
+
+```bash
+./install.sh --with-hooks
+```
+
+Wires two Claude Code session hooks:
+
+- **SessionStart** — surfaces recent sessions and active decisions before your first message
+- **PostToolUse(git commit)** — nudges you to log the session after a commit
+
+### Options
+
+```bash
+./install.sh [--pack <name>] [--with-hooks] [--hooks-scope user|project]
+
+  --pack           Schema pack to use (default: engineer)
+  --with-hooks     Install Claude Code session hooks
+  --hooks-scope    Where to wire hooks: user (all repos) or project (this repo only)
+                   Default: user
+```
+
+## Using the vault
+
+### With the tolvi CLI (recommended)
+
+Install the [tolvi CLI](https://github.com/tolvi-labs/tolvi) to query your vault in plain English:
+
+```bash
+go install github.com/tolvi-labs/tolvi/cli/cmd/tolvi@latest
+export ANTHROPIC_API_KEY=sk-ant-...
+tolvi ask "why did we choose postgres?"
+```
+
+The CLI uses Context-Augmented Generation — whole vault into Anthropic context, streamed answer with citations.
+
+### Without the CLI
+
+The vault is plain Markdown. Use Claude Code, Cursor, or any editor. The session hooks work regardless of whether the CLI is installed.
+
+### Writing decisions
+
+Copy a template from `vault/templates/`, fill in the Why / How / Outcome sections, and save it to `vault/decisions/YYYY-MM-DD-slug.md`.
+
+If you have the CLI:
+
+```bash
+tolvi sync decision "Choose Postgres over MySQL"
+```
+
+## Packs
+
+| Pack | Status | Verticals |
+|---|---|---|
+| `engineer` | ✅ | Tech choices, architecture, dependencies, process |
+| `writer` | planned | Projects, drafts, editorial decisions, source tracking |
+| `entrepreneur` | planned | Product bets, vendor decisions, hiring, strategy |
+| `cpa` | planned | Client decisions, workflow patterns, compliance notes |
+
+## License
+
+[Apache 2.0](./LICENSE).
