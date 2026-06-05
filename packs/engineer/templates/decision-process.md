@@ -1,7 +1,11 @@
 ---
-tags: [decision, process]
+tags: [decision, process, <repo-slug>]
 date: YYYY-MM-DD
+repo: <repo-slug>
 status: active
+ticket: none
+user_impact: none
+product_area: none
 ---
 
 # [Process or workflow decision title]

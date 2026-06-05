@@ -1,7 +1,11 @@
 ---
-tags: [decision, tech-choice]
+tags: [decision, tech-choice, <repo-slug>]
 date: YYYY-MM-DD
+repo: <repo-slug>
 status: active
+ticket: none
+user_impact: none
+product_area: none
 ---
 
 # Choose [A] over [B]

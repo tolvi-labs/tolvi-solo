@@ -1,7 +1,11 @@
 ---
-tags: [decision]
+tags: [decision, <repo-slug>]
 date: YYYY-MM-DD
+repo: <repo-slug>
 status: active
+ticket: none
+user_impact: none
+product_area: none
 ---
 
 # [Title — state the decision, not the question]
