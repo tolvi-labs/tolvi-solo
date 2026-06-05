@@ -1,7 +1,11 @@
 ---
-tags: [decision, dependency]
+tags: [decision, dependency, <repo-slug>]
 date: YYYY-MM-DD
+repo: <repo-slug>
 status: active
+ticket: none
+user_impact: none
+product_area: none
 ---
 
 # [Add / Pin / Remove] [package-name]

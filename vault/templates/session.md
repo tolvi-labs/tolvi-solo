@@ -1,5 +1,5 @@
 ---
-tags: [session]
+tags: [session, <repo-slug>]
 date: YYYY-MM-DD
 status: active
 ---
