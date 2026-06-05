@@ -84,6 +84,18 @@ tolvi sync decision "Choose Postgres over MySQL"
 | `writer` | planned | Projects, drafts, editorial decisions, source tracking |
 | `entrepreneur` | planned | Product bets, vendor decisions, hiring, strategy |
 | `cpa` | planned | Client decisions, workflow patterns, compliance notes |
+| `product` | planned | Feature decisions, prioritization, specs, discovery |
+| `designer` | planned | Design-system decisions, accessibility, interaction patterns, critiques |
+| `consultant` | planned | Client recommendations, reusable frameworks, engagement notes |
+| `researcher` | planned | Methodology decisions, literature notes, experiments |
+| `investor` | planned | Investment memos, theses, diligence, deal notes |
+| `devops` | planned | Infra decisions, postmortems, runbooks, on-call logs |
+| `data` | planned | Experiment decisions, model and dataset rationale, reproducibility |
+| `security` | planned | Threat models, vuln triage, controls, audit notes |
+| `teacher` | planned | Curriculum decisions, lesson patterns, assessments |
+| `sales` | planned | Deal decisions, playbooks, account notes, pipeline |
+| `recruiter` | planned | Candidate decisions, sourcing, scorecards, pipeline |
+| `architect` | planned | Building design decisions, code compliance, detailing, projects |
 
 ## License
 
