@@ -34,21 +34,21 @@ install_hooks() {
 
   mkdir -p "$CLAUDE_DIR/hooks"
 
-  cp "$HOOKS_SRC/session-recall.sh" "$CLAUDE_DIR/hooks/tolvi-solo-session-recall.sh"
-  cp "$HOOKS_SRC/commit-sync-nudge.sh" "$CLAUDE_DIR/hooks/tolvi-solo-commit-sync-nudge.sh"
-  chmod +x "$CLAUDE_DIR/hooks/tolvi-solo-session-recall.sh"
-  chmod +x "$CLAUDE_DIR/hooks/tolvi-solo-commit-sync-nudge.sh"
+  cp "$HOOKS_SRC/tolvi-recall" "$CLAUDE_DIR/hooks/tolvi-solo-recall"
+  cp "$HOOKS_SRC/tolvi-sync"   "$CLAUDE_DIR/hooks/tolvi-solo-sync"
+  chmod +x "$CLAUDE_DIR/hooks/tolvi-solo-recall"
+  chmod +x "$CLAUDE_DIR/hooks/tolvi-solo-sync"
 
-  local RECALL_HOOK="$CLAUDE_DIR/hooks/tolvi-solo-session-recall.sh"
-  local NUDGE_HOOK="$CLAUDE_DIR/hooks/tolvi-solo-commit-sync-nudge.sh"
+  local RECALL_HOOK="$CLAUDE_DIR/hooks/tolvi-solo-recall"
+  local SYNC_HOOK="$CLAUDE_DIR/hooks/tolvi-solo-sync"
 
   [[ ! -f "$SETTINGS_FILE" ]] && echo "{}" > "$SETTINGS_FILE"
 
   # Wire hooks into settings.json via Python (ships with macOS, no extra deps)
-  python3 - "$SETTINGS_FILE" "$RECALL_HOOK" "$NUDGE_HOOK" <<'PYEOF'
+  python3 - "$SETTINGS_FILE" "$RECALL_HOOK" "$SYNC_HOOK" <<'PYEOF'
 import json, sys
 
-settings_path, recall_hook, nudge_hook = sys.argv[1], sys.argv[2], sys.argv[3]
+settings_path, recall_hook, sync_hook = sys.argv[1], sys.argv[2], sys.argv[3]
 
 with open(settings_path) as f:
   s = json.load(f)
@@ -60,10 +60,10 @@ recall_entry = {"type": "command", "command": recall_hook}
 if not any(h.get("command") == recall_hook for h in ss):
   ss.append(recall_entry)
 
-ptu = hooks.setdefault("PostToolUse", [])
-nudge_entry = {"matcher": "Bash(git commit*)", "hooks": [{"type": "command", "command": nudge_hook}]}
-if not any(h.get("matcher") == nudge_entry["matcher"] for h in ptu):
-  ptu.append(nudge_entry)
+ptu = hooks.setdefault("PreToolUse", [])
+sync_entry = {"matcher": "Bash", "hooks": [{"type": "command", "if": "Bash(git commit*)", "command": sync_hook}]}
+if not any(any(h.get("command") == sync_hook for h in e.get("hooks", [])) for e in ptu):
+  ptu.append(sync_entry)
 
 with open(settings_path, "w") as f:
   json.dump(s, f, indent=2)
@@ -71,8 +71,8 @@ with open(settings_path, "w") as f:
 PYEOF
 
   echo "  Claude Code hooks installed (scope: $HOOKS_SCOPE)"
-  echo "    SessionStart            → tolvi-solo-session-recall"
-  echo "    PostToolUse(git commit) → tolvi-solo-commit-sync-nudge"
+  echo "    SessionStart         → tolvi-solo-recall (vault context before first message)"
+  echo "    PreToolUse(git commit) → tolvi-solo-sync (blocks commit until session note exists)"
 }
 
 # --- parse flags ---
