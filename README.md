@@ -37,6 +37,14 @@ Wires two Claude Code session hooks:
 - **`tolvi-recall` (SessionStart)** - surfaces recent sessions and active decisions before your first message
 - **`tolvi-sync` (PreToolUse, git commit)** - fires before every commit; auto-stages vault changes and blocks the commit if no session note exists for today, so the vault is always committed alongside the code
 
+It also installs three Claude Code slash commands (skip-if-exists, so they never clobber your own):
+
+- **`/tolvi-recall`** - surface recent sessions and active decisions on demand
+- **`/tolvi-sync`** - synthesize the whole working session into decisions, patterns, and a session log
+- **`/tolvi-commit`** - run that synthesis, then stage and commit (vault + work) in one step
+
+The hooks keep the vault committed; the `/tolvi-sync` and `/tolvi-commit` skills are what actually write the notes for you - the agent reconstructs the session and follows the schema, so you are not hand-filling templates. That synthesis is the point: it captures what was tried or considered in a working session, including reasoned rejections, which a stray Slack message or ticket never does.
+
 ### Options
 
 ```bash
