@@ -75,6 +75,35 @@ PYEOF
   echo "    PreToolUse(git commit) → tolvi-solo-sync (blocks commit until session note exists)"
 }
 
+install_commands() {
+  local CMD_SRC="$SCRIPT_DIR/commands"
+  [[ -d "$CMD_SRC" ]] || return 0
+
+  local CLAUDE_DIR
+  if [[ "$HOOKS_SCOPE" == "user" ]]; then
+    CLAUDE_DIR="${HOME}/.claude"
+  else
+    CLAUDE_DIR="$REPO_ROOT/.claude"
+  fi
+  if [[ ! -d "$CLAUDE_DIR" ]]; then
+    echo "  ⚠ $CLAUDE_DIR not found — skipping slash commands"
+    return
+  fi
+
+  mkdir -p "$CLAUDE_DIR/commands"
+  local f n
+  for f in "$CMD_SRC"/*.md; do
+    n="$(basename "$f")"
+    if [[ -e "$CLAUDE_DIR/commands/$n" ]]; then
+      echo "    ⚠ /${n%.md} exists — skipping (remove it to reinstall)"
+    else
+      cp "$f" "$CLAUDE_DIR/commands/$n"
+      echo "    installed /${n%.md}"
+    fi
+  done
+  echo "  Slash commands → $CLAUDE_DIR/commands/  (/tolvi-recall, /tolvi-sync, /tolvi-commit)"
+}
+
 # --- parse flags ---
 
 while [[ $# -gt 0 ]]; do
@@ -126,6 +155,7 @@ echo "  vault structure created"
 echo "  templates copied from pack: $PACK"
 
 [[ "$WITH_HOOKS" == "true" ]] && install_hooks
+[[ "$WITH_HOOKS" == "true" ]] && install_commands
 
 echo ""
 echo "✓ Vault ready at $VAULT_DIR"
