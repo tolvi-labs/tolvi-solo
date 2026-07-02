@@ -2,7 +2,7 @@
 
 A vault for solo builders. Capture decisions, patterns, and session notes as plain Markdown - searchable, committable, and readable by AI agents without any server setup.
 
-> **Status:** Early. Engineer pack is the first vertical. Writer, CPA, and Entrepreneur packs are planned.
+> **Status:** Early. Engineer and Writer packs are available. Entrepreneur, CPA, and more are planned.
 
 ## What it is
 
@@ -89,7 +89,7 @@ tolvi sync decision "Choose Postgres over MySQL"
 | Pack | Status | Verticals |
 |---|---|---|
 | `engineer` | ✅ | Tech choices, architecture, dependencies, process |
-| `writer` | planned | Projects, drafts, editorial decisions, source tracking |
+| `writer` | ✅ | Projects, drafts, editorial decisions, source tracking |
 | `entrepreneur` | planned | Product bets, vendor decisions, hiring, strategy |
 | `cpa` | planned | Client decisions, workflow patterns, compliance notes |
 | `product` | planned | Feature decisions, prioritization, specs, discovery |
