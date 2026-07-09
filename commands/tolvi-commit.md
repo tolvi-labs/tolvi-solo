@@ -29,6 +29,8 @@ Show the staged status. If there is nothing to commit, stop and say so.
 
 Commit with a clear, imperative message. Match the repo's existing commit conventions — check recent history with `git log --oneline -5` and follow the prevailing format (subject line, ticket prefix). Do not invent conventions the repo doesn't already use, and do not add any AI/assistant attribution (see above).
 
+If the `tolvi-sync` PreToolUse hook blocks the commit naming a *different* session file than the one written in Step 1 — this happens on the default branch, where the hook keys the file by Claude session id (something only the hook, not this command, can see) — do not write a second note. `mv` the file you already wrote to the path the hook's block message names, `git add` it, and retry the commit.
+
 ## Step 4 — Verify no attribution slipped in
 
 ```bash

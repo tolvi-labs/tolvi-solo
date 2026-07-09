@@ -39,8 +39,19 @@ install_hooks() {
   chmod +x "$CLAUDE_DIR/hooks/tolvi-solo-recall"
   chmod +x "$CLAUDE_DIR/hooks/tolvi-solo-sync"
 
-  local RECALL_HOOK="$CLAUDE_DIR/hooks/tolvi-solo-recall"
-  local SYNC_HOOK="$CLAUDE_DIR/hooks/tolvi-solo-sync"
+  # The path baked into settings.json's "command" field. For project scope this
+  # must stay portable across clones/machines, so use Claude Code's documented
+  # ${CLAUDE_PROJECT_DIR} placeholder instead of the absolute path used above for
+  # cp/chmod. For user scope the absolute $HOME path is correct — it's per-machine
+  # and never committed.
+  local RECALL_HOOK SYNC_HOOK
+  if [[ "$HOOKS_SCOPE" == "user" ]]; then
+    RECALL_HOOK="$CLAUDE_DIR/hooks/tolvi-solo-recall"
+    SYNC_HOOK="$CLAUDE_DIR/hooks/tolvi-solo-sync"
+  else
+    RECALL_HOOK='${CLAUDE_PROJECT_DIR}/.claude/hooks/tolvi-solo-recall'
+    SYNC_HOOK='${CLAUDE_PROJECT_DIR}/.claude/hooks/tolvi-solo-sync'
+  fi
 
   [[ ! -f "$SETTINGS_FILE" ]] && echo "{}" > "$SETTINGS_FILE"
 

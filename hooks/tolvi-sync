@@ -3,12 +3,20 @@
 #
 # Behavior:
 #   1. Auto-stages any modified vault/ files so they're always in the commit.
-#   2. Blocks the commit if no session note exists for today, instructing Claude
-#      to write one first.
+#   2. Blocks the commit if no session note exists for today (keyed by branch/issue,
+#      falling back to the Claude session id), instructing Claude to write one first.
 #   3. Allows the commit once a session note is present.
 set -euo pipefail
 
 TODAY="$(date +%Y-%m-%d)"
+
+# Read the PreToolUse payload once (Claude Code always pipes JSON here). Skip
+# the read when stdin is a terminal so running this script by hand doesn't
+# hang waiting for input that will never come.
+INPUT=""
+if [[ ! -t 0 ]]; then
+  INPUT="$(cat 2>/dev/null || true)"
+fi
 
 find_vault() {
   local dir="${1:-$PWD}"
@@ -17,6 +25,48 @@ find_vault() {
     dir="$(dirname "$dir")"
   done
   return 1
+}
+
+# Derive a filename-safe slug from the current branch: an issue id if one is
+# embedded in the branch name (Jira/Linear-style ABC-123, or a leading #42/42-),
+# else the slugified branch itself. Returns empty on the default branch, detached
+# HEAD, or no branch — callers fall back to the Claude session id.
+session_slug() {
+  local branch issue
+  branch="$(git symbolic-ref --short -q HEAD 2>/dev/null || true)"
+
+  case "$branch" in
+    ""|main|master|develop|trunk) return ;;
+  esac
+
+  issue="$(grep -oE '[A-Za-z]{2,}-[0-9]+' <<<"$branch" | head -1 || true)"
+  if [[ -n "$issue" ]]; then
+    # Reject matches whose "project key" is actually a generic branch-type word
+    # (e.g. "fix-2", "feat-1") — those aren't issue ids and, unlike a real
+    # project key, discarding the rest of the branch to key on them alone
+    # causes exactly the collisions this function exists to avoid (two
+    # unrelated branches like alice/fix-2 and bob/fix-2 would otherwise both
+    # key to "fix-2").
+    local word
+    word="$(printf '%s' "${issue%%-*}" | tr '[:upper:]' '[:lower:]')"
+    case "$word" in
+      feature|feat|fix|bugfix|hotfix|chore|patch|release|task|issue|ticket|bug|wip|tmp|temp|test|spike|poc|misc)
+        issue="" ;;
+    esac
+  fi
+  if [[ -z "$issue" ]]; then
+    issue="$(grep -oE '^#?[0-9]+' <<<"$branch" | head -1 || true)"
+  fi
+
+  if [[ -n "$issue" ]]; then
+    echo "${issue//#/}" | tr '[:upper:]' '[:lower:]'
+    return
+  fi
+
+  echo "$branch" \
+    | sed -E 's#^(feature|feat|fix|bugfix|chore)/##' \
+    | tr '[:upper:]' '[:lower:]' \
+    | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//'
 }
 
 VAULT="$(find_vault "$PWD" 2>/dev/null)" || exit 0
@@ -30,12 +80,32 @@ if [[ -n "$UNSTAGED" || -n "$UNTRACKED" ]]; then
   git add vault/
 fi
 
-# Block if no session note for today
-SESSION_FILE="$VAULT/sessions/$TODAY.md"
+# Key the session note by branch/issue slug when one exists (keeps concurrent
+# branches/PRs in separate files); otherwise fall back to the Claude session id
+# (keeps concurrent agents on the default branch in separate files too, instead
+# of everyone colliding on the bare date). Degrades to plain date if neither is
+# available.
+SLUG="$(session_slug)"
+if [[ -z "$SLUG" ]]; then
+  SLUG="$(printf '%s' "$INPUT" | python3 -c 'import json,sys
+try:
+  print((json.load(sys.stdin).get("session_id") or "")[:8])
+except Exception:
+  pass' 2>/dev/null || true)"
+fi
+
+if [[ -n "$SLUG" ]]; then
+  BASENAME="$TODAY-$SLUG"
+else
+  BASENAME="$TODAY"
+fi
+
+# Block if no session note for this key
+SESSION_FILE="$VAULT/sessions/$BASENAME.md"
 if [[ ! -f "$SESSION_FILE" ]] || ! grep -q "^## " "$SESSION_FILE" 2>/dev/null; then
   printf '{"decision":"block","reason":"No session note for %s. Write a brief session entry to vault/sessions/%s.md (use vault/templates/session.md — what changed, what is left open), stage it, then commit. The vault will be included in the commit automatically."}' \
-    "$TODAY" "$TODAY"
+    "$BASENAME" "$BASENAME"
   exit 0
 fi
 
-printf '{"decision":"allow","additionalContext":"Vault synced for %s — session note present, vault changes staged."}' "$TODAY"
+printf '{"decision":"allow","additionalContext":"Vault synced for %s — session note present, vault changes staged."}' "$BASENAME"
