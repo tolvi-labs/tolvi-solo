@@ -35,7 +35,7 @@ Run from inside the repo you want to vault. Creates `vault/` at the git root wit
 Wires two Claude Code session hooks:
 
 - **`tolvi-recall` (SessionStart)** - surfaces recent sessions and active decisions before your first message
-- **`tolvi-sync` (PreToolUse, git commit)** - fires before every commit; auto-stages vault changes and blocks the commit if no session note exists for today, so the vault is always committed alongside the code
+- **`tolvi-sync` (PreToolUse, git commit)** - fires before every commit; auto-stages vault changes and blocks the commit if no session note exists for the current branch (keyed by branch/issue, falling back to the Claude session id), so the vault is always committed alongside the code
 
 It also installs three Claude Code slash commands (skip-if-exists, so they never clobber your own):
 
@@ -83,6 +83,28 @@ If you have the CLI:
 ```bash
 tolvi sync decision "Choose Postgres over MySQL"
 ```
+
+## Using tolvi-solo with git worktrees
+
+The hooks resolve the vault per git working-tree, so if you run parallel agents in
+`git worktree` checkouts, lay them out so each track resolves to the right vault:
+
+- **Create worktrees as siblings, not nested.** Prefer `git worktree add ../<repo>-<issue>`
+  over `git worktree add ./worktrees/<issue>`. A sibling layout keeps each track's
+  tree unambiguous; a worktree nested inside the main repo invites vault resolution
+  to climb into the parent repo's vault.
+- **Each worktree carries its own `vault/`.** Since `vault/` is tracked, a normal
+  checkout already has its own copy — the intended state. If a branch deliberately
+  omits it, tolvi tells you the note is routing to a parent vault instead of failing
+  silently (set `TOLVI_STRICT_WORKTREE=1` to block the commit instead of warning).
+- **The vault is the shared, durable record; per-worktree notes converge via merges.**
+  Notes land on their branch and reach the canonical vault when the PR merges — that's
+  the design, not a leak. The leak is only a note reaching the main tree without going
+  through its branch, which this convention plus per-worktree resolution prevent.
+- **Sanity check before writing in a worktree:** `git rev-parse --show-toplevel`
+  should equal the worktree path you think you're in. If it points at the main repo,
+  you're not actually in the worktree and any note you write will route to the shared
+  vault.
 
 ## Packs
 

@@ -20,6 +20,13 @@ fi
 
 find_vault() {
   local dir="${1:-$PWD}"
+  # Prefer the current git worktree's own vault, so a nested worktree never
+  # resolves to an ancestor repo's vault.
+  local top
+  top="$(git -C "$dir" rev-parse --show-toplevel 2>/dev/null || true)"
+  if [[ -n "$top" && -f "$top/vault/.vault-meta.json" ]]; then
+    echo "$top/vault" && return
+  fi
   while [[ "$dir" != "/" ]]; do
     [[ -f "$dir/vault/.vault-meta.json" ]] && echo "$dir/vault" && return
     dir="$(dirname "$dir")"
@@ -71,6 +78,23 @@ session_slug() {
 
 VAULT="$(find_vault "$PWD" 2>/dev/null)" || exit 0
 REPO_ROOT="$(dirname "$VAULT")"
+
+# If resolution fell back to an ancestor vault (this worktree owns no vault of
+# its own), the session note is about to route to a parent repo. Surface that
+# instead of leaking silently. Capture the toplevel from the current $PWD before
+# the cd below, or the comparison is always trivially equal. Warn by default;
+# block only under strict mode.
+TOPLEVEL="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+if [[ -n "$TOPLEVEL" && "$TOPLEVEL" != "$REPO_ROOT" ]]; then
+  if [[ "${TOLVI_STRICT_WORKTREE:-}" == "1" ]]; then
+    printf '{"decision":"block","reason":"This worktree (%s) has no vault; the session note would be written to the parent vault at %s. Run tolvi from a checkout that owns its vault, or create the note in this worktree first."}' \
+      "$TOPLEVEL" "$REPO_ROOT"
+  else
+    printf '{"decision":"allow","additionalContext":"tolvi: this worktree (%s) has no vault of its own; vault operations are routing to the parent vault at %s. Give this worktree its own vault, or set TOLVI_STRICT_WORKTREE=1 to block instead."}' \
+      "$TOPLEVEL" "$REPO_ROOT"
+  fi
+  exit 0
+fi
 
 # Auto-stage any unstaged vault changes so they land in this commit
 cd "$REPO_ROOT"

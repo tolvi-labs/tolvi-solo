@@ -5,6 +5,13 @@ set -euo pipefail
 
 find_vault() {
   local dir="${1:-$PWD}"
+  # Prefer the current git worktree's own vault, so a nested worktree never
+  # resolves to an ancestor repo's vault.
+  local top
+  top="$(git -C "$dir" rev-parse --show-toplevel 2>/dev/null || true)"
+  if [[ -n "$top" && -f "$top/vault/.vault-meta.json" ]]; then
+    echo "$top/vault" && return
+  fi
   while [[ "$dir" != "/" ]]; do
     [[ -f "$dir/vault/.vault-meta.json" ]] && echo "$dir/vault" && return
     dir="$(dirname "$dir")"

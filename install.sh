@@ -181,3 +181,6 @@ else
   echo "  2. Install tolvi CLI for natural-language vault queries:"
   echo "     go install github.com/tolvi-labs/tolvi/cli/cmd/tolvi@latest"
 fi
+echo ""
+echo "Using git worktrees? Create them as siblings (git worktree add ../<repo>-<issue>),"
+echo "not nested — see \"Using tolvi-solo with git worktrees\" in the README."
