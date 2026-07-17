@@ -24,17 +24,17 @@ DECISIONS_DIR="$VAULT/decisions"
 
 recent_sessions=""
 if [[ -d "$SESSIONS_DIR" ]]; then
-  recent_sessions="$(ls -1 "$SESSIONS_DIR"/*.md 2>/dev/null | sort -r | head -3 | while read -r f; do
+  recent_sessions="$(find "$SESSIONS_DIR" -maxdepth 1 -name '*.md' 2>/dev/null | sort -r | head -3 | while read -r f; do
     echo "- $(basename "$f" .md)"
-  done)"
+  done)" || true
 fi
 
 active_decisions=""
 if [[ -d "$DECISIONS_DIR" ]]; then
-  active_decisions="$(ls -1 "$DECISIONS_DIR"/*.md 2>/dev/null | grep -v '.gitkeep' | sort -r | head -10 | while read -r f; do
+  active_decisions="$(find "$DECISIONS_DIR" -maxdepth 1 -name '*.md' 2>/dev/null | sort -r | head -10 | while read -r f; do
     title="$(grep -m1 '^# ' "$f" 2>/dev/null | sed 's/^# //' || basename "$f" .md)"
     echo "- $title"
-  done)"
+  done)" || true
 fi
 
 context=""
