@@ -30,7 +30,7 @@ ls vault/
 
 ## Brand isolation
 
-This project is published under the **Tolvi Labs** name. Do not reference Torres Atlantic, [redacted], [redacted], or any other Torres Atlantic product in any contributed file. The `NOTICE` file is the only place those names appear, and it must not be modified.
+This project is published under the **Tolvi Labs** name. Keep contributions scoped to Tolvi Labs: do not reference the parent company or any of its other products or brands in any contributed file. The `NOTICE` file is the only place the copyright holder is named, and it must not be modified.
 
 ## License
 
