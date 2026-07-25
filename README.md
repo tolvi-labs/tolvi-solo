@@ -34,7 +34,7 @@ Run from inside the repo you want to vault. Creates `vault/` at the git root wit
 
 Wires two Claude Code session hooks:
 
-- **`tolvi-recall` (SessionStart)** - surfaces recent sessions and active decisions before your first message
+- **`tolvi-recall` (SessionStart)** - surfaces recent sessions and active decisions before your first message; on a `/clear` it instead directs Claude to run the full `/tolvi-recall` command, so a cleared session reorients with the complete recall rather than the lightweight digest
 - **`tolvi-sync` (PreToolUse, git commit)** - fires before every commit; auto-stages vault changes and blocks the commit if no session note exists for today, so the vault is always committed alongside the code
 
 It also installs three Claude Code slash commands (skip-if-exists, so they never clobber your own):
