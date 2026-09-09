@@ -115,8 +115,9 @@ install_commands() {
   echo "  Slash commands → $CLAUDE_DIR/commands/  (/tolvi-recall, /tolvi-sync, /tolvi-commit)"
 }
 
-# Symlinks sibling Tolvi stack skills — tolvi-bastion and tolvi-guild — from repos
-# cloned alongside this one, so /tolvi-bastion and /tolvi-guild ship with the suite.
+# Symlinks the Tolvi stack skills so they ship with the suite. tolvi-bastion and
+# tolvi-guild come from repos cloned alongside this one; vault-health ships in
+# this repo, so it installs whether or not the siblings are present.
 install_stack_skills() {
   local parent CLAUDE_DIR
   parent="$(dirname "$SCRIPT_DIR")"   # the tolvi-labs/ workspace
@@ -132,14 +133,19 @@ install_stack_skills() {
 
   mkdir -p "$CLAUDE_DIR/skills"
   local name src dest
-  for name in tolvi-bastion tolvi-guild; do
+  for name in tolvi-bastion tolvi-guild vault-health; do
     case "$name" in
       tolvi-bastion) src="$parent/bastion/skills/tolvi-bastion" ;;
       tolvi-guild)   src="$parent/guild/skills/tolvi-guild" ;;
+      vault-health)  src="$SCRIPT_DIR/skills/vault-health" ;;
     esac
     dest="$CLAUDE_DIR/skills/$name"
     if [[ ! -d "$src" ]]; then
-      echo "    ⚠ $name: source not found at $src — clone tolvi-labs/${name#tolvi-} alongside tolvi-solo (skipping)"
+      if [[ "$name" == vault-health ]]; then
+        echo "    ⚠ $name: source not found at $src (skipping)"
+      else
+        echo "    ⚠ $name: source not found at $src — clone tolvi-labs/${name#tolvi-} alongside tolvi-solo (skipping)"
+      fi
       continue
     fi
     if [[ -e "$dest" || -L "$dest" ]]; then
@@ -149,7 +155,7 @@ install_stack_skills() {
     ln -s "$src" "$dest"
     echo "    installed /$name (symlink → $src)"
   done
-  echo "  Stack skills → $CLAUDE_DIR/skills/  (/tolvi-bastion, /tolvi-guild)"
+  echo "  Stack skills → $CLAUDE_DIR/skills/  (/tolvi-bastion, /tolvi-guild, /vault-health)"
 }
 
 # --- parse flags ---
