@@ -65,9 +65,20 @@ sync_entry = {"matcher": "Bash", "hooks": [{"type": "command", "if": "Bash(git c
 if not any(any(h.get("command") == sync_hook for h in e.get("hooks", [])) for e in ptu):
   ptu.append(sync_entry)
 
+# Allowlist the read-only tolvi subcommands so /tolvi-recall and `tolvi ask`
+# stop raising a permission prompt on every use. Writes are deliberately NOT
+# allowlisted: `tolvi sync` and `tolvi commit` mutate the vault and the git
+# history, so they should stay a conscious per-call approval.
+allow = s.setdefault("permissions", {}).setdefault("allow", [])
+added = [r for r in ("Bash(tolvi recall:*)", "Bash(tolvi ask:*)") if r not in allow]
+allow.extend(added)
+
 with open(settings_path, "w") as f:
   json.dump(s, f, indent=2)
   f.write("\n")
+
+if added:
+  print("  allowlisted " + ", ".join(added) + " (read-only; sync/commit still prompt)")
 PYEOF
 
   echo "  Claude Code hooks installed (scope: $HOOKS_SCOPE)"
