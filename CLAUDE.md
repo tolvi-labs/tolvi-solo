@@ -1,12 +1,13 @@
 # tolvi-solo
 
-Vault schema packs for solo builders. This repo ships the Engineer and Writer packs today; Entrepreneur, CPA, and more are planned.
+Vault schema packs for solo builders. This repo ships the Engineer, Writer, Entrepreneur, and CPA packs today; Product, Designer, Consultant, and more are planned.
 
 ## Structure
 
 ```
 packs/<name>/          — schema pack (templates, README)
 hooks/                 — Claude Code session hooks (tolvi-recall, tolvi-sync)
+skills/vault-health/   — stack skill: deterministic tolvi-format vault health check
 install.sh             — provisions vault/ in any git repo
 vault/                 — this repo's own vault (tracked, engineer pack)
 ```

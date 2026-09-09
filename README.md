@@ -2,7 +2,7 @@
 
 A vault for solo builders. Capture decisions, patterns, and session notes as plain Markdown - searchable, committable, and readable by AI agents without any server setup.
 
-> **Status:** Early. Engineer and Writer packs are available. Entrepreneur, CPA, and more are planned.
+> **Status:** Early. Engineer, Writer, Entrepreneur, and CPA packs are available. Product, Designer, Consultant, and more are planned.
 
 ## What it is
 
@@ -95,8 +95,8 @@ tolvi sync decision "Choose Postgres over MySQL"
 |---|---|---|
 | `engineer` | ✅ | Tech choices, architecture, dependencies, process |
 | `writer` | ✅ | Projects, drafts, editorial decisions, source tracking |
-| `entrepreneur` | planned | Product bets, vendor decisions, hiring, strategy |
-| `cpa` | planned | Client decisions, workflow patterns, compliance notes |
+| `entrepreneur` | ✅ | Bets, vendor decisions, hiring, strategy |
+| `cpa` | ✅ | Tax positions, engagements, compliance, workflow patterns |
 | `product` | planned | Feature decisions, prioritization, specs, discovery |
 | `designer` | planned | Design-system decisions, accessibility, interaction patterns, critiques |
 | `consultant` | planned | Client recommendations, reusable frameworks, engagement notes |
