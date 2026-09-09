@@ -19,13 +19,19 @@ Runs `scripts/vault_health.py` against a `vault/` directory and reports defects 
 
 ## Running it
 
+The script sits beside this file at `scripts/vault_health.py`. Resolve it against **this skill's own directory** — the base directory given when the skill loads — not against the current repo. The skill is normally installed as a symlink in `~/.claude/skills/vault-health` and invoked from whatever repo you happen to be in, so a path relative to the working directory will not find it.
+
 ```bash
-cd skills/vault-health/scripts
-uv run --with pyyaml --with pytest python -m pytest tests/   # optional: verify the checks
-uv run --with pyyaml python vault_health.py <path-to-vault-dir>
+uv run --with pyyaml python <skill-dir>/scripts/vault_health.py <path-to-vault-dir>
 ```
 
-`requirements.txt` pins the one runtime dependency (PyYAML) for a plain `pip install -r requirements.txt` setup; pytest is only needed to run the test suite.
+`uv` fetches PyYAML on the fly, so there is no install step. On a plain interpreter, `pip install -r <skill-dir>/scripts/requirements.txt` first — it pins the one runtime dependency.
+
+To verify the checks themselves, which is only useful when working on the skill:
+
+```bash
+cd <skill-dir>/scripts && uv run --with pyyaml --with pytest python -m pytest tests/
+```
 
 Print the full console output back to the user — do not summarize or truncate it further; the script already truncates long finding lists itself.
 
