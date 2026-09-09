@@ -43,6 +43,11 @@ It also installs three Claude Code slash commands (skip-if-exists, so they never
 - **`/tolvi-sync`** - synthesize the whole working session into decisions, patterns, and a session log
 - **`/tolvi-commit`** - run that synthesis, then stage and commit (vault + work) in one step
 
+It also symlinks the Tolvi stack skills into `.claude/skills/`, skipping any that are already present:
+
+- **`/vault-health`** - deterministic health check for a tolvi-format vault; reports empty tags, unrecognized status values, duplicate titles, unfilled template placeholders, and escaped unicode, graded by dimension. Ships in this repo, so it installs on its own.
+- **`/tolvi-bastion`** and **`/tolvi-guild`** - the plan-hardening and task-grounding skills. These live in their own repos, so they install only when `tolvi-labs/bastion` and `tolvi-labs/guild` are cloned alongside this one; otherwise the installer says so and moves on.
+
 The hooks keep the vault committed; the `/tolvi-sync` and `/tolvi-commit` skills are what actually write the notes for you - the agent reconstructs the session and follows the schema, so you are not hand-filling templates. That synthesis is the point: it captures what was tried or considered in a working session, including reasoned rejections, which a stray Slack message or ticket never does.
 
 ### Options
