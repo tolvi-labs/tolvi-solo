@@ -51,7 +51,8 @@ Grades run over five dimensions — tags, lifecycle, dedup, completeness, unicod
 ## Scope
 
 - Checks only what tolvi-format-v1 defines: frontmatter `tags` and `status`, the `# Heading` a note opens with, and unfilled template markers. `related:` and wikilinks are never checked.
-- Files under `templates/` are skipped. They are unfilled by design, and every placeholder check would fire on them.
+- Files under `templates/` are skipped, matched as a path segment so it holds whether you address the vault directly or from a level above it. They are unfilled by design, and every placeholder check would fire on them.
+- A freshly provisioned vault holds only templates, so it reports "no notes yet" and exits 0 rather than erroring. Pointing at a directory that is not a vault and has no notes still errors, with a hint about the `vault/` path.
 - The title is the note's first `# Heading`, not a frontmatter field — tolvi-format has no `title:` key.
 - `template-placeholder` looks in frontmatter values and in headings, never in body prose. A note that documents the `sessions/YYYY-MM-DD.md` naming convention is prose, not a half-filled template.
 - An absent `status:` is treated as `active` by convention, not as a defect.

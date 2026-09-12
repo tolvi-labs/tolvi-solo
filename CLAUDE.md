@@ -1,6 +1,6 @@
 # tolvi-solo
 
-Vault schema packs for solo builders. This repo ships the Engineer, Writer, Entrepreneur, and CPA packs today; Product, Designer, Consultant, and more are planned.
+Vault schema packs for solo builders. This repo ships the Engineer, Writer, Entrepreneur, CPA, Data, and Security packs today; Product, Designer, Consultant, and more are planned.
 
 ## Structure
 

@@ -14,7 +14,9 @@ from vault_health import (
     check_unparseable,
     compute_grades,
     extract_heading,
+    is_skipped,
     load_notes,
+    main,
     render_report,
     run_all_checks,
 )
@@ -43,6 +45,23 @@ def test_load_notes_parses_frontmatter_and_body(tmp_path):
     assert n.frontmatter["tags"] == ["decision", "demo"]
     assert "some prose" in n.body
     assert n.parse_error is None
+
+
+@pytest.mark.parametrize("rel,skipped", [
+    ("templates/decision.md", True),
+    ("vault/templates/decision.md", True),
+    ("decisions/a.md", False),
+    ("decisions/templates-i-considered.md", False),
+])
+def test_is_skipped_matches_path_segments_not_prefixes(rel, skipped):
+    assert is_skipped(rel) is skipped
+
+
+def test_load_notes_skips_templates_one_level_up(tmp_path):
+    """Pointed a level above the vault, `vault/templates/` must still skip."""
+    write(tmp_path, "vault/templates/decision.md", note("tags: [x]\ndate: YYYY-MM-DD\n"))
+    write(tmp_path, "vault/decisions/a.md", GOOD)
+    assert [n.rel_path for n in load_notes(tmp_path)] == ["vault/decisions/a.md"]
 
 
 def test_load_notes_skips_templates_dir(tmp_path):
@@ -243,3 +262,26 @@ def test_render_report_truncates_long_finding_lists(tmp_path):
     notes = load_notes(tmp_path)
     out = render_report(tmp_path, notes, run_all_checks(notes))
     assert "showing first 10 of 15" in out
+
+
+# --- empty-vault handling ----------------------------------------------
+
+def test_fresh_vault_with_only_templates_is_healthy_not_an_error(tmp_path, capsys):
+    """A just-provisioned vault holds only templates/ — a valid state, exit 0."""
+    write(tmp_path, "templates/decision.md", note("tags: [decision, <repo-slug>]\ndate: YYYY-MM-DD\n"))
+    (tmp_path / ".vault-meta.json").write_text('{"pack": "data"}', encoding="utf-8")
+    assert main([str(tmp_path)]) == 0
+    assert "No notes yet" in capsys.readouterr().out
+
+
+def test_vault_with_standard_dirs_but_no_notes_is_healthy(tmp_path, capsys):
+    for d in ("decisions", "patterns", "sessions"):
+        (tmp_path / d).mkdir()
+    assert main([str(tmp_path)]) == 0
+    assert "No notes yet" in capsys.readouterr().out
+
+
+def test_non_vault_directory_with_no_markdown_is_still_an_error(tmp_path, capsys):
+    (tmp_path / "src").mkdir()
+    assert main([str(tmp_path)]) == 1
+    assert "not the repo root" in capsys.readouterr().err

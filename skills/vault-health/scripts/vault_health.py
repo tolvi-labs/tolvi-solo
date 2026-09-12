@@ -43,14 +43,20 @@ class Finding:
 # filtered-out and everything else as live.
 KNOWN_STATUSES = frozenset({"active", "in-progress", "draft", "superseded", "deprecated"})
 
-SKIP_DIRS = ("templates/",)
+# Matched as a path segment, not a prefix: the vault may be addressed as
+# `vault/` or from a level above it, and `vault/templates/x.md` must skip too.
+SKIP_DIRS = frozenset({"templates"})
+
+
+def is_skipped(rel_path: str) -> bool:
+    return bool(SKIP_DIRS & set(Path(rel_path).parts))
 
 
 def load_notes(vault_dir: Path) -> list[Note]:
     notes = []
     for path in sorted(vault_dir.rglob("*.md")):
         rel_path = str(path.relative_to(vault_dir))
-        if rel_path.startswith(SKIP_DIRS):
+        if is_skipped(rel_path):
             continue
         try:
             raw = path.read_text(encoding="utf-8")
@@ -284,6 +290,14 @@ def render_report(vault_dir: Path, notes: list[Note], findings: list[Finding]) -
     return "\n".join(lines)
 
 
+VAULT_MARKERS = (".vault-meta.json", "decisions", "sessions")
+
+
+def looks_like_a_vault(path: Path) -> bool:
+    """True when the directory is a tolvi vault that simply has no notes yet."""
+    return any((path / marker).exists() for marker in VAULT_MARKERS)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="tolvi-format vault health check")
     parser.add_argument("vault_dir", type=Path)
@@ -295,7 +309,17 @@ def main(argv: list[str] | None = None) -> int:
 
     notes = load_notes(args.vault_dir)
     if not notes:
+        # A freshly provisioned vault holds only `templates/`, which the loader
+        # skips. That is a valid state, not an error — but the same emptiness
+        # also shows when the path points at a repo root instead of its vault/,
+        # so only the former is reported as healthy.
+        if looks_like_a_vault(args.vault_dir):
+            print(f"VAULT HEALTH — {args.vault_dir}")
+            print("─" * 40)
+            print("No notes yet — nothing to check. Vault structure looks correct.")
+            return 0
         print(f"error: no markdown files found under {args.vault_dir}", file=sys.stderr)
+        print("hint: pass the `vault/` directory itself, not the repo root that contains it", file=sys.stderr)
         return 1
 
     print(render_report(args.vault_dir, notes, run_all_checks(notes)))

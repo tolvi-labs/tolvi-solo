@@ -2,7 +2,7 @@
 
 A vault for solo builders. Capture decisions, patterns, and session notes as plain Markdown - searchable, committable, and readable by AI agents without any server setup.
 
-> **Status:** Early. Engineer, Writer, Entrepreneur, and CPA packs are available. Product, Designer, Consultant, and more are planned.
+> **Status:** Early. Engineer, Writer, Entrepreneur, CPA, Data, and Security packs are available. Product, Designer, Consultant, and more are planned.
 
 ## What it is
 
@@ -97,14 +97,14 @@ tolvi sync decision "Choose Postgres over MySQL"
 | `writer` | ✅ | Projects, drafts, editorial decisions, source tracking |
 | `entrepreneur` | ✅ | Bets, vendor decisions, hiring, strategy |
 | `cpa` | ✅ | Tax positions, engagements, compliance, workflow patterns |
+| `data` | ✅ | Experiments, datasets, model choices, reproducibility |
+| `security` | ✅ | Threat models, vuln triage, controls |
 | `product` | planned | Feature decisions, prioritization, specs, discovery |
 | `designer` | planned | Design-system decisions, accessibility, interaction patterns, critiques |
 | `consultant` | planned | Client recommendations, reusable frameworks, engagement notes |
 | `researcher` | planned | Methodology decisions, literature notes, experiments |
 | `investor` | planned | Investment memos, theses, diligence, deal notes |
 | `devops` | planned | Infra decisions, postmortems, runbooks, on-call logs |
-| `data` | planned | Experiment decisions, model and dataset rationale, reproducibility |
-| `security` | planned | Threat models, vuln triage, controls, audit notes |
 | `teacher` | planned | Curriculum decisions, lesson patterns, assessments |
 | `sales` | planned | Deal decisions, playbooks, account notes, pipeline |
 | `recruiter` | planned | Candidate decisions, sourcing, scorecards, pipeline |
