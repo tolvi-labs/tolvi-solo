@@ -1,5 +1,6 @@
 .DS_Store
 .worktrees/
+vault/.obsidian/
 
 # Python bytecode from skills/vault-health/scripts
 __pycache__/
