@@ -19,6 +19,11 @@ Runs `scripts/vault_health.py` against a `vault/` directory and reports defects 
 
 ## Running it
 
+**If the `tolvi` CLI is installed, prefer `tolvi doctor vault-health`.** The same checks are built into the CLI natively, so it needs no Python, no `uv`, and no PyYAML, and it runs as part of a plain `tolvi doctor` too. The two implementations are pinned against each other by the parity check in the tolvi repo, so they report the same findings and the same grades.
+
+This script is the path for vaults used without the CLI at all.
+
+
 The script sits beside this file at `scripts/vault_health.py`. Resolve it against **this skill's own directory** — the base directory given when the skill loads — not against the current repo. The skill is normally installed as a symlink in `~/.claude/skills/vault-health` and invoked from whatever repo you happen to be in, so a path relative to the working directory will not find it.
 
 ```bash
