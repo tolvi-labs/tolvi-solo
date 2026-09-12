@@ -24,7 +24,7 @@ cd tolvi-solo
 ./install.sh
 ```
 
-Run from inside the repo you want to vault. Creates `vault/` at the git root, with the Engineer pack's templates by default — pass `--pack <name>` to pick another (see [Packs](#packs)).
+Run from inside the repo you want to vault. Creates `vault/` at the git root, with the Engineer pack's templates by default. Pass `--pack <name>` to pick another (see [Packs](#packs)).
 
 ### With Claude Code hooks (recommended)
 
