@@ -136,11 +136,12 @@ install_stack_skills() {
 
   mkdir -p "$CLAUDE_DIR/skills"
   local name src dest
-  for name in tolvi-bastion tolvi-guild vault-health; do
+  for name in tolvi-guild tolvi-bastion tolvi-magellan vault-health; do
     case "$name" in
-      tolvi-bastion) src="$parent/bastion/skills/tolvi-bastion" ;;
-      tolvi-guild)   src="$parent/guild/skills/tolvi-guild" ;;
-      vault-health)  src="$SCRIPT_DIR/skills/vault-health" ;;
+      tolvi-guild)    src="$parent/guild/skills/tolvi-guild" ;;
+      tolvi-bastion)  src="$parent/bastion/skills/tolvi-bastion" ;;
+      tolvi-magellan) src="$parent/magellan/skills/tolvi-magellan" ;;
+      vault-health)   src="$SCRIPT_DIR/skills/vault-health" ;;
     esac
     dest="$CLAUDE_DIR/skills/$name"
     if [[ ! -d "$src" ]]; then
