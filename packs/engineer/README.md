@@ -26,8 +26,8 @@ Templates for software engineers. Covers the four decision categories that come 
 
 ## Naming conventions
 
-Decisions: `YYYY-MM-DD-slug.md` — date-prefixed, kebab-case slug derived from the title.
+Decisions: `YYYY-MM-DD-slug.md`: date-prefixed, kebab-case slug derived from the title.
 
-Patterns: `slug.md` — no date prefix. Patterns are timeless; decisions are time-stamped.
+Patterns: `slug.md`: no date prefix. Patterns are timeless; decisions are time-stamped.
 
-Sessions: `YYYY-MM-DD.md` — one file per day, multiple session blocks per file if you work multiple sessions.
+Sessions: `YYYY-MM-DD.md`: one file per day, multiple session blocks per file if you work multiple sessions.

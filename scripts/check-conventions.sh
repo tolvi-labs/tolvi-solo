@@ -77,6 +77,27 @@ if [ -n "$loop_names" ]; then
   echo "✓ install.sh: stack-skill loop and case branches agree ($loop_names)"
 fi
 
+# ── 4. no em dashes in README prose ──────────────────────────────────────
+# READMEs take spaced hyphens, colons, commas, or full stops. Code fences
+# (literal tool output, trees, comments) and table N/A glyphs are exempt
+# because they are not prose. Checked rather than reviewed, because the
+# previous per-sentence judgement call is how they accumulated.
+while IFS= read -r f; do
+  hits="$(awk '
+    /^[[:space:]]*```/ { infence = !infence; next }
+    !infence && /—/ {
+      if ($0 ~ /\|[[:space:]]*—[[:space:]]*\|/) next
+      printf "  %s:%d  %s\n", FILENAME, FNR, substr($0, 1, 100)
+    }
+  ' "$f")"
+  if [ -n "$hits" ]; then
+    echo "✗ em dash in README prose:"
+    printf '%s\n' "$hits"
+    fail=1
+  fi
+done < <(git ls-files '*README.md')
+[ "$fail" -ne 0 ] || echo "✓ READMEs: no em dashes in prose"
+
 [ "$fail" -eq 0 ] || { echo ""; echo "See scripts/check-conventions.sh for why each rule exists."; exit 1; }
 echo ""
 echo "All conventions checks passed."
