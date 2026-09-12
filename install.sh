@@ -105,6 +105,9 @@ install_commands() {
   local f n
   for f in "$CMD_SRC"/*.md; do
     n="$(basename "$f")"
+    # Underscore-prefixed files are shared includes (e.g. _preflight.md), not
+    # slash commands; installing one would create a bogus /_preflight.
+    [[ "$n" == _* ]] && continue
     if [[ -e "$CLAUDE_DIR/commands/$n" ]]; then
       echo "    ⚠ /${n%.md} exists — skipping (remove it to reinstall)"
     else
@@ -219,9 +222,33 @@ echo "Next steps:"
 echo "  1. Write your first decision:"
 echo "     cp $VAULT_DIR/templates/decision.md $VAULT_DIR/decisions/$(date +%Y-%m-%d)-first-decision.md"
 echo ""
+# Verify the binary is reachable BY NAME, not merely installed. `go install`
+# succeeds into $(go env GOPATH)/bin, which is often not on PATH, so an install
+# can look complete while every slash command silently falls back to reading
+# vault/ directly. Naming only the install command is not a fix; the PATH
+# export is the half people miss.
+#
+# This duplicates tolvi's own installer check on purpose: tolvi-solo is a
+# standalone clone and cannot depend on the tolvi repo being present. Each
+# repo pins its own copy with its own check script.
 if command -v tolvi &>/dev/null; then
   echo "  2. Query your vault:  tolvi ask \"what decisions have I made?\""
+  echo ""
+  echo "  tolvi CLI: $(command -v tolvi)"
+  echo "  Run 'tolvi doctor' to check the rest of your setup."
 else
-  echo "  2. Install tolvi CLI for natural-language vault queries:"
-  echo "     go install github.com/tolvi-labs/tolvi/cli/cmd/tolvi@latest"
+  cat <<EOF
+  2. The tolvi CLI is not on your PATH.
+
+     The vault and the slash commands work without it: they read vault/
+     directly. You lose 'tolvi ask' and the single-invocation recall path.
+
+     To install it:
+         go install github.com/tolvi-labs/tolvi/cli/cmd/tolvi@latest
+
+     Then make it reachable, which 'go install' does not do for you:
+         export PATH="\$PATH:\$(go env GOPATH)/bin"     # add to ~/.zshrc or ~/.bashrc
+
+     Verify with:  tolvi doctor
+EOF
 fi
