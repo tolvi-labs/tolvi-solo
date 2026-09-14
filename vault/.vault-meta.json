@@ -1,6 +1,6 @@
 {
-  "workspace": "tolvi-solo",
-  "pack": "engineer",
-  "format": "tolvi-format-v1",
-  "created": "2026-06-05"
+  "workspace": "tolvi-labs",
+  "repo": "tolvi-solo",
+  "embedding_model": "nomic-embed-text",
+  "schema_version": 2
 }
