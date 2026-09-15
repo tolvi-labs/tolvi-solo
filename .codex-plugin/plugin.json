@@ -1,0 +1,34 @@
+{
+  "name": "tolvi-solo",
+  "version": "0.1.0",
+  "description": "A vault for solo builders, with no server setup",
+  "author": {
+    "name": "Tolvi Labs",
+    "url": "https://tolvilabs.com"
+  },
+  "homepage": "https://tolvilabs.com/tolvi-solo",
+  "repository": "https://github.com/tolvi-labs/tolvi-solo",
+  "license": "Apache-2.0",
+  "keywords": [
+    "vault",
+    "decisions",
+    "solo"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Tolvi Solo",
+    "shortDescription": "A vault for solo builders, with no server setup",
+    "longDescription": "Capture decisions, patterns and session notes as plain Markdown: searchable, committable, and readable by AI agents without any server. Role-specific template packs included.",
+    "developerName": "Tolvi Labs",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://tolvilabs.com",
+    "privacyPolicyURL": "https://tolvilabs.com/privacy",
+    "termsOfServiceURL": "https://tolvilabs.com/terms",
+    "brandColor": "#84CC16"
+  }
+}
