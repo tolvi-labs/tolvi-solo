@@ -1,0 +1,17 @@
+{
+  "name": "tolvi-solo",
+  "description": "A vault for solo builders: capture decisions, patterns, and session notes as plain Markdown, with no server setup.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Tolvi Labs",
+    "url": "https://tolvilabs.com"
+  },
+  "homepage": "https://tolvilabs.com/tolvi-solo",
+  "repository": "https://github.com/tolvi-labs/tolvi-solo",
+  "license": "Apache-2.0",
+  "keywords": [
+    "vault",
+    "decisions",
+    "solo"
+  ]
+}
