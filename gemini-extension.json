@@ -1,0 +1,6 @@
+{
+  "name": "tolvi-solo",
+  "description": "A vault for solo builders, with no server setup",
+  "version": "0.1.0",
+  "contextFileName": "GEMINI.md"
+}

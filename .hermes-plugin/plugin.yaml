@@ -1,0 +1,6 @@
+name: tolvi-solo
+version: 0.1.0
+description: A vault for solo builders, with no server setup
+author: Tolvi Labs
+# No provides_hooks: this plugin ships skills, not a Python hook implementation.
+# Declaring a hook it does not implement would fail at load rather than degrade.

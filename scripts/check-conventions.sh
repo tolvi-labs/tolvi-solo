@@ -126,6 +126,9 @@ else
 fi
 rm -rf "$probe"
 
+# ── 5. plugin manifests agree ────────────────────────────────────────────
+bash "$repo_root/scripts/plugin-manifest-check.sh" || fail=1
+
 [ "$fail" -eq 0 ] || { echo ""; echo "See scripts/check-conventions.sh for why each rule exists."; exit 1; }
 echo ""
 echo "All conventions checks passed."

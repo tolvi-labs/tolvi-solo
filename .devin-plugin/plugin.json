@@ -1,0 +1,17 @@
+{
+  "name": "tolvi-solo",
+  "version": "0.1.0",
+  "description": "A vault for solo builders, with no server setup",
+  "author": {
+    "name": "Tolvi Labs",
+    "url": "https://tolvilabs.com"
+  },
+  "homepage": "https://tolvilabs.com/tolvi-solo",
+  "repository": "https://github.com/tolvi-labs/tolvi-solo",
+  "license": "Apache-2.0",
+  "keywords": [
+    "vault",
+    "decisions",
+    "solo"
+  ]
+}
