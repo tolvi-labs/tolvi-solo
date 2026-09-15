@@ -89,6 +89,24 @@ If you have the CLI:
 tolvi sync decision "Choose Postgres over MySQL"
 ```
 
+## Upgrading a vault made by an older installer
+
+Installers before 2026-09-14 wrote a `.vault-meta.json` that was missing `embedding_model` and `schema_version` and carried `pack`, `format` and `created` as bare keys. The published format permits neither omission nor extra top-level keys outside the `x-` namespace, so the `tolvi` CLI refuses those vaults with `embedding_model field is required`.
+
+Re-run the installer to repair it in place:
+
+```bash
+bash install.sh --pack engineer
+```
+
+It preserves the `workspace` already on disk, so a name you chose yourself survives, and rewrites the rest into the conformant shape. Your decisions, sessions and patterns are untouched; only the metadata file changes.
+
+To check a vault without changing anything:
+
+```bash
+python3 scripts/check-vault-meta.py vault/.vault-meta.json && echo conformant
+```
+
 ## Packs
 
 | Pack | Status | Verticals |
