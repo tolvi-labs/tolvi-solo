@@ -198,12 +198,18 @@ echo "  workspace: $WORKSPACE"
 
 mkdir -p "$VAULT_DIR/decisions" "$VAULT_DIR/patterns" "$VAULT_DIR/sessions" "$VAULT_DIR/templates"
 
+# Conformant tolvi-format-v2 metadata. The pack and provisioning date are
+# tolvi-solo's own business, so they ride in the `x-` namespace the format
+# reserves for implementation extensions; a bare `pack:` or `created:` key is
+# rejected by the published schema, which sets additionalProperties: false.
+# This shape is what lets the `tolvi` CLI read a vault this installer made.
 cat > "$VAULT_DIR/.vault-meta.json" <<EOF
 {
   "workspace": "$WORKSPACE",
-  "pack": "$PACK",
-  "format": "tolvi-format-v1",
-  "created": "$(date +%Y-%m-%d)"
+  "embedding_model": "nomic-embed-text",
+  "schema_version": 2,
+  "x-tolvi-solo-pack": "$PACK",
+  "x-tolvi-solo-created": "$(date +%Y-%m-%d)"
 }
 EOF
 

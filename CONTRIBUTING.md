@@ -18,7 +18,7 @@ A pack lives at `packs/<name>/` and contains:
 - `README.md` — what the pack is and when to use each template
 - `templates/` — one `.md` file per template type
 
-Use the `engineer` pack as a reference. Templates must use `tolvi-format-v1` frontmatter (see [`packs/engineer/templates/decision.md`](./packs/engineer/templates/decision.md)).
+Use the `engineer` pack as a reference. Templates must use `tolvi-format-v2` frontmatter (see [`packs/engineer/templates/decision.md`](./packs/engineer/templates/decision.md)).
 
 ## Testing the installer
 
