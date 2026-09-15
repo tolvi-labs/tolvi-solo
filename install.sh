@@ -192,9 +192,24 @@ REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 WORKSPACE="$(basename "$REPO_ROOT")"
 VAULT_DIR="$REPO_ROOT/vault"
 
+# Re-running the installer is how an existing vault gets repaired, so preserve
+# the identity already on disk rather than resetting it: a user who set their
+# own workspace keeps it, and a vault written by an older installer picks up
+# the required fields it was missing.
+LEGACY_META=false
+if [ -f "$VAULT_DIR/.vault-meta.json" ]; then
+  EXISTING_WORKSPACE="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1])).get("workspace",""))' "$VAULT_DIR/.vault-meta.json" 2>/dev/null || true)"
+  [ -n "${EXISTING_WORKSPACE:-}" ] && WORKSPACE="$EXISTING_WORKSPACE"
+  python3 "$(dirname "$0")/scripts/check-vault-meta.py" "$VAULT_DIR/.vault-meta.json" >/dev/null 2>&1 || LEGACY_META=true
+fi
+
 echo "→ Provisioning vault at $VAULT_DIR"
 echo "  pack:      $PACK"
 echo "  workspace: $WORKSPACE"
+if [ "$LEGACY_META" = true ]; then
+  echo "  repairing: .vault-meta.json was written by an older installer and is"
+  echo "             missing fields the format requires; rewriting it in place."
+fi
 
 mkdir -p "$VAULT_DIR/decisions" "$VAULT_DIR/patterns" "$VAULT_DIR/sessions" "$VAULT_DIR/templates"
 

@@ -9,6 +9,12 @@
 #  2. Every slash command's PREFLIGHT block must match commands/_preflight.md.
 #     Hand-maintained copies drift; this pins them.
 #
+#  3. The vault install.sh provisions must be readable by the tolvi CLI. The
+#     installer shipped a meta missing embedding_model and schema_version, and
+#     carrying bare pack/format/created keys the published schema rejects, for
+#     as long as tolvi-solo has existed. Nothing noticed, because nothing ever
+#     provisioned a vault and looked at the result. This check does.
+#
 # tolvi-solo is a standalone clone and cannot depend on the tolvi repo, so both
 # the remediation text and this check are deliberate duplicates of tolvi's.
 # See tolvi/.github/scripts/ for the sibling copies.
@@ -97,6 +103,28 @@ while IFS= read -r f; do
   fi
 done < <(git ls-files '*README.md')
 [ "$fail" -ne 0 ] || echo "✓ READMEs: no em dashes in prose"
+
+# ── 4. install.sh provisions a conformant vault ──────────────────────────
+# Runs the installer for real, into a throwaway repo, and validates what it
+# wrote. Asserting on the heredoc's text instead would pass while the vault it
+# makes stays unreadable, which is the failure this exists to catch.
+repo_root="$PWD"
+probe="$(mktemp -d)"
+( cd "$probe" && git init -q . && bash "$repo_root/install.sh" --pack engineer >/dev/null 2>&1 ) \
+  || { echo "✗ install.sh failed when provisioning a probe vault"; fail=1; }
+
+meta="$probe/vault/.vault-meta.json"
+if [ ! -f "$meta" ]; then
+  echo "✗ install.sh did not write a .vault-meta.json"
+  fail=1
+elif problems="$(python3 "$repo_root/scripts/check-vault-meta.py" "$meta")"; then
+  echo "✓ install.sh: provisioned vault conforms to the published meta schema"
+else
+  echo "✗ install.sh provisioned a non-conformant vault:"
+  printf '%s\n' "$problems" | sed 's/^/    /'
+  fail=1
+fi
+rm -rf "$probe"
 
 [ "$fail" -eq 0 ] || { echo ""; echo "See scripts/check-conventions.sh for why each rule exists."; exit 1; }
 echo ""
