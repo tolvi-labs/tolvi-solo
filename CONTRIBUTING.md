@@ -30,7 +30,7 @@ ls vault/
 
 ## Brand isolation
 
-This project is published under the **Tolvi Labs** name. Keep contributions scoped to Tolvi Labs: do not reference the parent company or any of its other products or brands in any contributed file. The `NOTICE` file is the only place the copyright holder is named, and it must not be modified.
+This project is published under the **Tolvi Labs** name. Keep contributions scoped to Tolvi Labs: do not reference the parent company or any of its other products or brands in any contributed file. The `NOTICE` file and the copyright line in `LICENSE` are the only places the copyright holder is named, and neither may be modified.
 
 ## License
 
