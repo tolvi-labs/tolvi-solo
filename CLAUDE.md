@@ -8,6 +8,7 @@ Vault schema packs for solo builders. This repo ships the Engineer, Writer, Entr
 packs/<name>/          — schema pack (templates, README)
 hooks/                 — Claude Code session hooks (tolvi-recall, tolvi-sync)
 skills/vault-health/   — stack skill: deterministic tolvi-format vault health check
+tests/vault-health/    — tests for the vault-health script, kept out of the shipped skill
 install.sh             — provisions vault/ in any git repo
 vault/                 — this repo's own vault (tracked, engineer pack)
 ```

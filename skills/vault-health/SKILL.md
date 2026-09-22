@@ -19,7 +19,7 @@ Runs `scripts/vault_health.py` against a `vault/` directory and reports defects 
 
 ## Running it
 
-**If the `tolvi` CLI is installed, prefer `tolvi doctor vault-health`.** The same checks are built into the CLI natively, so it needs no Python, no `uv`, and no PyYAML, and it runs as part of a plain `tolvi doctor` too. The two implementations are pinned against each other by the parity check in the tolvi repo, so they report the same findings and the same grades.
+**If the `tolvi` CLI is installed, prefer `tolvi doctor vault-health`.** The same checks are built into the CLI natively, so it needs no Python, and it runs as part of a plain `tolvi doctor` too. The two implementations are pinned against each other by the parity check in the tolvi repo, so they report the same findings and the same grades.
 
 This script is the path for vaults used without the CLI at all.
 
@@ -27,15 +27,15 @@ This script is the path for vaults used without the CLI at all.
 The script sits beside this file at `scripts/vault_health.py`. Resolve it against **this skill's own directory** — the base directory given when the skill loads — not against the current repo. The skill is normally installed as a symlink in `~/.claude/skills/vault-health` and invoked from whatever repo you happen to be in, so a path relative to the working directory will not find it.
 
 ```bash
-uv run --with pyyaml python <skill-dir>/scripts/vault_health.py <path-to-vault-dir>
+python3 <skill-dir>/scripts/vault_health.py <path-to-vault-dir>
 ```
 
-`uv` fetches PyYAML on the fly, so there is no install step. On a plain interpreter, `pip install -r <skill-dir>/scripts/requirements.txt` first — it pins the one runtime dependency.
+The script uses only the Python standard library, so there is no install step.
 
-To verify the checks themselves, which is only useful when working on the skill:
+To verify the checks themselves, which is only useful when working on the skill, run the tests from a tolvi-solo checkout. They live outside the skill so they do not ship with it:
 
 ```bash
-cd <skill-dir>/scripts && uv run --with pyyaml --with pytest python -m pytest tests/
+uv run --with pytest python -m pytest tests/vault-health
 ```
 
 Print the full console output back to the user — do not summarize or truncate it further; the script already truncates long finding lists itself.

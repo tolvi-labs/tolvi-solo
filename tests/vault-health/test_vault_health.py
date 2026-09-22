@@ -17,9 +17,12 @@ from vault_health import (
     is_skipped,
     load_notes,
     main,
+    parse_frontmatter,
     render_report,
     run_all_checks,
 )
+
+SCRIPT = Path(__file__).resolve().parents[2] / "skills" / "vault-health" / "scripts" / "vault_health.py"
 
 
 def write(tmp_path: Path, rel: str, text: str) -> Path:
@@ -88,6 +91,106 @@ def test_load_notes_records_non_mapping_frontmatter_as_parse_error(tmp_path):
     write(tmp_path, "a.md", note("- just\n- a list\n"))
     (n,) = load_notes(tmp_path)
     assert n.parse_error == "frontmatter is not a mapping"
+
+
+# --- frontmatter parser -------------------------------------------------
+#
+# Expected values are what yaml.v3 (the Go port's parser) and PyYAML both
+# produce for the same input, so parity holds on every shape accepted here.
+
+@pytest.mark.parametrize("text,expected", [
+    ("date: 2026-01-01", {"date": "2026-01-01"}),
+    ("tags: [decision, demo]", {"tags": ["decision", "demo"]}),
+    ("tags: []", {"tags": []}),
+    ('tags: ["a, b", \'c\']', {"tags": ["a, b", "c"]}),
+    ('date: "2026-09-15"', {"date": "2026-09-15"}),
+    ("date: '2026-08-08'", {"date": "2026-08-08"}),
+    ("title: 'it''s'", {"title": "it's"}),
+    ('title: "a \\"q\\" \\u00e9"', {"title": 'a "q" é'}),
+    ("source: https://x.y/z", {"source": "https://x.y/z"}),
+    ("title: C#sharp", {"title": "C#sharp"}),
+    ("tags: [a] # why\nstatus: active # note", {"tags": ["a"], "status": "active"}),
+    ("my key: v", {"my key": "v"}),
+    ('"k": v', {"k": "v"}),
+    ("tags:\n  - a\n  - b", {"tags": ["a", "b"]}),
+    ("tags:\n- a\n- b\nstatus: active", {"tags": ["a", "b"], "status": "active"}),
+    ("metadata:\n  type: decision\n  deep:\n    x: y\nstatus: active",
+     {"metadata": {"type": "decision", "deep": {"x": "y"}}, "status": "active"}),
+    ("tags: [a,\n  b]", {"tags": ["a", "b"]}),
+    ("tags:\n  [\n    a,\n    b(c),\n  ]\nstatus: active", {"tags": ["a", "b(c)"], "status": "active"}),
+    ("m: {a: b, c: [d]}", {"m": {"a": "b", "c": ["d"]}}),
+    ("tags: [[a]]", {"tags": [["a"]]}),
+    ("summary: |\n  one\n  two\nstatus: active", {"summary": "one\ntwo\n", "status": "active"}),
+    ("tags: [a]\nsummary: |\n  hi", {"tags": ["a"], "summary": "hi"}),  # the block ends the input
+    ("tags: [a]\ntags: [b]", {"tags": ["b"]}),
+    ("# a comment\n\ntags: [a]", {"tags": ["a"]}),
+])
+def test_parse_frontmatter_accepts_what_yaml_accepts(text, expected):
+    assert parse_frontmatter(text) == expected
+
+
+@pytest.mark.parametrize("text,expected", [
+    ("status:", None),
+    ("status: ~", None),
+    ("status: null", None),
+    ("flag: true", True),
+    ("flag: False", False),
+    ("n: 3", 3),
+])
+def test_parse_frontmatter_resolves_scalars(text, expected):
+    (value,) = parse_frontmatter(text).values()
+    assert value == expected and type(value) is type(expected)
+
+
+@pytest.mark.parametrize("text", [
+    "title: Foo: bar",          # mapping value inside a plain scalar
+    "title: foo:",
+    "x: - foo",                 # block entry where a value belongs
+    "x: `foo`",
+    "x: @foo",
+    "x: *foo",                  # alias
+    "tags: [a]\nmetadata:\n\ttype: x",   # tab indentation
+    "tags: [a]\n  status: active",       # indentation with no parent
+    "tags: [unclosed",
+    "tags: [a] x",
+])
+def test_parse_frontmatter_rejects_what_yaml_rejects(text):
+    with pytest.raises(ValueError):
+        parse_frontmatter(text)
+
+
+@pytest.mark.parametrize("text", [
+    "tags: &x [a]",             # anchor
+    "tags: !!seq [a]",          # explicit tag
+    "tags: [a]\n...",           # document end marker
+])
+def test_parse_frontmatter_refuses_unsupported_yaml_loudly(text):
+    with pytest.raises(ValueError, match="unsupported"):
+        parse_frontmatter(text)
+
+
+@pytest.mark.parametrize("text", ["", "hello", "- just\n- a list"])
+def test_parse_frontmatter_requires_a_mapping(text):
+    with pytest.raises(ValueError, match="frontmatter is not a mapping"):
+        parse_frontmatter(text)
+
+
+def test_script_imports_only_the_standard_library():
+    """The packaged skill cannot carry a pip dependency, so none may creep back."""
+    import ast
+    import sys
+
+    tree = ast.parse(SCRIPT.read_text(encoding="utf-8"))
+    imported = {
+        (node.module or "").split(".")[0] if isinstance(node, ast.ImportFrom) else alias.name.split(".")[0]
+        for node in ast.walk(tree) if isinstance(node, (ast.Import, ast.ImportFrom))
+        for alias in node.names
+    }
+    assert imported <= set(sys.stdlib_module_names) | {"__future__"}
+
+
+def test_script_names_its_interpreter():
+    assert SCRIPT.read_text(encoding="utf-8").startswith("#!/usr/bin/env python3\n")
 
 
 # --- heading extraction -------------------------------------------------
