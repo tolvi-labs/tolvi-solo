@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Deterministic health checks for a tolvi-format vault.
 
 Checks only what the tolvi-format-v1 schema actually defines — frontmatter
