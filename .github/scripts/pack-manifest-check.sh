@@ -29,14 +29,24 @@ for dir in packs/*/; do
     continue
   fi
 
-  declared_name="$(node -p "require('./$manifest').name")"
+  # A pack directory name reaches this script from a glob, and this script runs
+  # on pull requests, so the name is untrusted input. It is validated before use
+  # and never interpolated into a program string: jq takes the path as an
+  # argument, so a crafted directory name is data rather than code.
+  if ! echo "$name" | grep -qE '^[a-z][a-z0-9-]*$'; then
+    echo "✗ $name: pack directory names must match ^[a-z][a-z0-9-]*$"
+    fail=1
+    continue
+  fi
+
+  declared_name="$(jq -r '.name' "$manifest")"
   if [ "$declared_name" != "$name" ]; then
     echo "✗ $name: pack.json declares name \"$declared_name\""
     fail=1
   fi
 
   # Templates, both directions.
-  listed="$(node -p "require('./$manifest').templates.map(t => t.file).sort().join('\n')")"
+  listed="$(jq -r '.templates[].file' "$manifest" | sort)"
   ondisk="$(find "$dir/templates" -name '*.md' -type f -exec basename {} \; | sort)"
   if [ "$listed" != "$ondisk" ]; then
     echo "✗ $name: pack.json templates and templates/ disagree"
@@ -45,17 +55,15 @@ for dir in packs/*/; do
   fi
 
   # A template with no "use when" is a row nobody can render.
-  if ! node -e "
-    const m = require('./$manifest');
-    const bad = m.templates.filter(t => !t.use || !t.use.trim()).map(t => t.file);
-    if (bad.length) { console.log('✗ $name: no \"use\" for ' + bad.join(', ')); process.exit(1); }
-  "; then
+  missing_use="$(jq -r '.templates[] | select((.use // "" | gsub("^\\s+|\\s+$"; "")) == "") | .file' "$manifest")"
+  if [ -n "$missing_use" ]; then
+    echo "✗ $name: no \"use\" for $(echo "$missing_use" | tr '\n' ' ')"
     fail=1
   fi
 
   # The README table is what a person reads; the manifest is what a tool reads.
-  status="$(node -p "require('./$manifest').status")"
-  row="$(grep -E "^\| \`$name\` \|" README.md || true)"
+  status="$(jq -r '.status' "$manifest")"
+  row="$(grep -F -- "| \`$name\` |" README.md || true)"
   if [ -z "$row" ]; then
     echo "✗ $name: no row in the README Packs table"
     fail=1
