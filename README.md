@@ -128,6 +128,8 @@ python3 scripts/check-vault-meta.py vault/.vault-meta.json && echo conformant
 | `recruiter` | planned | Candidate decisions, sourcing, scorecards, pipeline |
 | `architect` | planned | Building design decisions, code compliance, detailing, projects |
 
+Each shipped pack declares itself in `packs/<name>/pack.json`: its status, what it covers, and every template with what to use it for. That is the machine-readable source of truth, so tools read a manifest instead of parsing this table, and `.github/scripts/pack-manifest-check.sh` fails the build when a manifest, its templates and this table disagree.
+
 ## License
 
 [Apache 2.0](./LICENSE).

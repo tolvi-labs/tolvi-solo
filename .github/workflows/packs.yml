@@ -1,0 +1,17 @@
+name: packs
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  pack-manifests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      # packs/<name>/pack.json is what the tolvi CLI vendors, so drift between
+      # a manifest, its templates and the README is a problem in two repos.
+      - name: Pack manifests
+        run: bash .github/scripts/pack-manifest-check.sh

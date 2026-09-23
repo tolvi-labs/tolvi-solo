@@ -177,7 +177,14 @@ done
 PACK_DIR="$SCRIPT_DIR/packs/$PACK"
 if [[ ! -d "$PACK_DIR" ]]; then
   echo "Pack '$PACK' not found. Available packs:"
-  ls "$SCRIPT_DIR/packs/"
+  # Each pack declares itself in pack.json, so this lists what the packs say
+  # they are rather than whatever directories happen to be here.
+  for manifest in "$SCRIPT_DIR"/packs/*/pack.json; do
+    [[ -f "$manifest" ]] || continue
+    name="$(sed -n 's/^  "name": "\(.*\)",$/\1/p' "$manifest")"
+    summary="$(sed -n 's/^  "summary": "\(.*\)",$/\1/p' "$manifest" | cut -c1-72)"
+    printf '  %-14s %s\n' "$name" "$summary"
+  done
   exit 1
 fi
 
