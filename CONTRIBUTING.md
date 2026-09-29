@@ -1,6 +1,6 @@
 # Contributing
 
-Contributions are welcome — bug fixes, new pack templates, installer improvements, and additional vertical packs.
+Contributions are welcome: bug fixes, new pack templates, installer improvements, and additional vertical packs.
 
 ## Getting started
 
@@ -15,8 +15,8 @@ No build step. The installer is a single bash script; packs are plain Markdown.
 
 A pack lives at `packs/<name>/` and contains:
 
-- `README.md` — what the pack is and when to use each template
-- `templates/` — one `.md` file per template type
+- `README.md`: what the pack is and when to use each template
+- `templates/`: one `.md` file per template type
 
 Use the `engineer` pack as a reference. Templates must use `tolvi-format-v2` frontmatter (see [`packs/engineer/templates/decision.md`](./packs/engineer/templates/decision.md)).
 
