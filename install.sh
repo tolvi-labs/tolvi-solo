@@ -39,8 +39,16 @@ install_hooks() {
   chmod +x "$CLAUDE_DIR/hooks/tolvi-solo-recall"
   chmod +x "$CLAUDE_DIR/hooks/tolvi-solo-sync"
 
-  local RECALL_HOOK="$CLAUDE_DIR/hooks/tolvi-solo-recall"
-  local SYNC_HOOK="$CLAUDE_DIR/hooks/tolvi-solo-sync"
+  # A project-scope settings.json is committed and runs on other people's
+  # checkouts, so its hook paths must resolve per machine, not to this one.
+  local RECALL_HOOK SYNC_HOOK
+  if [[ "$HOOKS_SCOPE" == "user" ]]; then
+    RECALL_HOOK="$CLAUDE_DIR/hooks/tolvi-solo-recall"
+    SYNC_HOOK="$CLAUDE_DIR/hooks/tolvi-solo-sync"
+  else
+    RECALL_HOOK='"$CLAUDE_PROJECT_DIR"/.claude/hooks/tolvi-solo-recall'
+    SYNC_HOOK='"$CLAUDE_PROJECT_DIR"/.claude/hooks/tolvi-solo-sync'
+  fi
 
   [[ ! -f "$SETTINGS_FILE" ]] && echo "{}" > "$SETTINGS_FILE"
 
@@ -55,15 +63,30 @@ with open(settings_path) as f:
 
 hooks = s.setdefault("hooks", {})
 
-ss = hooks.setdefault("SessionStart", [])
-recall_entry = {"type": "command", "command": recall_hook}
-if not any(h.get("command") == recall_hook for h in ss):
-  ss.append(recall_entry)
+# Drop every tolvi-solo entry before re-adding the current ones. Older
+# installers wrote a SessionStart entry without the {"hooks": [...]} wrapper
+# (so recall never ran) and absolute paths into project settings; re-running
+# the installer is how those get repaired.
+def ours(h):
+  return "tolvi-solo-recall" in h.get("command", "") or "tolvi-solo-sync" in h.get("command", "")
 
-ptu = hooks.setdefault("PreToolUse", [])
-sync_entry = {"matcher": "Bash", "hooks": [{"type": "command", "if": "Bash(git commit*)", "command": sync_hook}]}
-if not any(any(h.get("command") == sync_hook for h in e.get("hooks", [])) for e in ptu):
-  ptu.append(sync_entry)
+def strip(entries):
+  kept = []
+  for e in entries:
+    if ours(e):
+      continue
+    if "hooks" in e:
+      e["hooks"] = [h for h in e["hooks"] if not ours(h)]
+      if not e["hooks"]:
+        continue
+    kept.append(e)
+  return kept
+
+hooks["SessionStart"] = strip(hooks.get("SessionStart", []))
+hooks["SessionStart"].append({"hooks": [{"type": "command", "command": recall_hook}]})
+
+hooks["PreToolUse"] = strip(hooks.get("PreToolUse", []))
+hooks["PreToolUse"].append({"matcher": "Bash", "hooks": [{"type": "command", "if": "Bash(git commit*)", "command": sync_hook}]})
 
 # Allowlist the read-only tolvi subcommands so /tolvi-recall and `tolvi ask`
 # stop raising a permission prompt on every use. Writes are deliberately NOT
@@ -118,7 +141,7 @@ install_commands() {
   echo "  Slash commands → $CLAUDE_DIR/commands/  (/tolvi-recall, /tolvi-sync, /tolvi-commit)"
 }
 
-# Symlinks the Tolvi stack skills so they ship with the suite. tolvi-bastion and
+# Installs the Tolvi stack skills so they ship with the suite. tolvi-bastion and
 # tolvi-guild come from repos cloned alongside this one; vault-health ships in
 # this repo, so it installs whether or not the siblings are present.
 install_stack_skills() {
@@ -156,8 +179,16 @@ install_stack_skills() {
       echo "    ⚠ /$name exists — skipping (remove it to reinstall)"
       continue
     fi
-    ln -s "$src" "$dest"
-    echo "    installed /$name (symlink → $src)"
+    # User scope links to the clones so a git pull updates the skill. Project
+    # scope gets a copy, because .claude/ is committed and a link to this
+    # machine's checkout is dangling on everyone else's.
+    if [[ "$HOOKS_SCOPE" == "user" ]]; then
+      ln -s "$src" "$dest"
+      echo "    installed /$name (symlink → $src)"
+    else
+      cp -R "$src" "$dest"
+      echo "    installed /$name (copied from $src)"
+    fi
   done
   echo "  Stack skills → $CLAUDE_DIR/skills/  (/tolvi-bastion, /tolvi-guild, /vault-health)"
 }

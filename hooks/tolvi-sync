@@ -8,6 +8,19 @@
 #   3. Allows the commit once a session note is present.
 set -euo pipefail
 
+# The settings entry carries an "if": "Bash(git commit*)" filter, but Claude
+# Code does not always honor it, and then this hook fires on every Bash call.
+# So the hook checks the command itself and stays silent for anything that is
+# not a git commit; otherwise it would stage vault/ and block unrelated commands.
+HOOK_INPUT="$(cat 2>/dev/null || true)"
+IS_COMMIT="$(printf '%s' "$HOOK_INPUT" | python3 -c 'import json,re,sys
+try:
+    cmd = json.load(sys.stdin).get("tool_input", {}).get("command", "")
+except Exception:
+    cmd = ""
+print("yes" if re.search(r"(^|[;&|(]\s*)git(\s+-[cC]\s+\S+)*\s+commit(\s|$)", cmd) else "no")' 2>/dev/null || echo no)"
+[[ "$IS_COMMIT" == "yes" ]] || exit 0
+
 TODAY="$(date +%Y-%m-%d)"
 
 find_vault() {
