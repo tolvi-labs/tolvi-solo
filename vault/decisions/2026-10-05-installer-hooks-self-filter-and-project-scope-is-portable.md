@@ -22,7 +22,7 @@ A user who installed tolvi-solo into a shared repo hit three bugs at once: the c
 - Re-running the installer repairs an old install: it strips every entry whose command names `tolvi-solo-recall` or `tolvi-solo-sync` (bare or wrapped, absolute path or not), drops any wrapper left empty, and appends the current entries. Other hooks in the same arrays are preserved, and repeated runs do not duplicate entries.
 - Project scope writes `"$CLAUDE_PROJECT_DIR"/.claude/hooks/tolvi-solo-*` as the hook command, because `.claude/settings.json` is committed and runs on other checkouts. User scope keeps absolute `~/.claude/hooks/...` paths, which are correct there because nothing is shared.
 - Project scope copies the stack skills (`vault-health`, and `tolvi-guild`, `tolvi-bastion`, `tolvi-magellan` when their sibling clones exist) into `.claude/skills/`. User scope still symlinks them, so a `git pull` in the clone updates the skill. The report named only vault-health, but the sibling skills had the same dangling-symlink failure and were fixed with it.
-- Not changed: the gate's pass path still emits a top-level `"decision": "allow"`, which is not a documented PreToolUse value (the current form is `hookSpecificOutput.permissionDecision`). Left for a separate change.
+- The gate's output format (top-level `"decision"`, unsupported for PreToolUse) was fixed in a follow-up the same day; see [[2026-10-05-commit-hooks-check-their-own-command-and-speak-hookspecificoutput]] in the tolvi vault.
 
 ## Outcome
 A project-scope install now works on any teammate's checkout, recall runs at session start, and the commit gate only fires on `git commit`, verified by installing into scratch repos seeded with the old malformed settings and feeding each hook sample payloads.
